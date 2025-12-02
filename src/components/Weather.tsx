@@ -4,12 +4,38 @@ import { fetchWeather } from '../services/weatherService';
 import { WiDaySunny, WiCloudy, WiRain, WiSnow, WiThunderstorm } from 'react-icons/wi';
 import styles from './Weather.module.css';
 
-export const Weather: React.FC = () => {
+interface WeatherProps {
+    show: boolean;
+    manualLocation?: string;
+}
+
+export const Weather: React.FC<WeatherProps> = ({ show, manualLocation }) => {
     const [weather, setWeather] = useState<WeatherData | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchWeather().then(setWeather).catch(console.error);
-    }, []);
+        if (!show) return;
+
+        setWeather(null);
+        setError(null);
+
+        fetchWeather(manualLocation)
+            .then(setWeather)
+            .catch((err) => {
+                console.error(err);
+                setError('Weather unavailable');
+            });
+    }, [show, manualLocation]);
+
+    if (!show || (!weather && !error)) return null;
+
+    if (error) {
+        return (
+            <div className={styles.weatherContainer}>
+                <span className={styles.city}>{error}</span>
+            </div>
+        );
+    }
 
     if (!weather) return null;
 
@@ -28,8 +54,16 @@ export const Weather: React.FC = () => {
                 {getWeatherIcon(weather.weatherCode)}
             </div>
             <div className={styles.info}>
-                <span className={styles.temp}>{weather.temperature}°C</span>
-                {/* <span className={styles.city}>{weather.city}</span> */}
+                <div className={styles.mainInfo}>
+                    <span className={styles.temp}>{weather.temperature}°C</span>
+                    <span className={styles.city}>{weather.city}</span>
+                </div>
+                {(weather.maxTemp !== undefined && weather.minTemp !== undefined) && (
+                    <div className={styles.details}>
+                        <span className={styles.detailItem}>H: {weather.maxTemp}°</span>
+                        <span className={styles.detailItem}>L: {weather.minTemp}°</span>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -6,9 +6,16 @@ import { CSS } from '@dnd-kit/utilities';
 import { FaPlus, FaTimes } from 'react-icons/fa';
 import styles from './Bookmarks.module.css';
 
+interface BookmarksProps {
+    isLocked: boolean;
+}
+
 // Sortable Item Component
-const SortableItem = ({ bookmark, onDelete }: { bookmark: Bookmark; onDelete: (id: string) => void }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: bookmark.id });
+const SortableItem = ({ bookmark, onDelete, isLocked }: { bookmark: Bookmark; onDelete: (id: string) => void; isLocked: boolean }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+        id: bookmark.id,
+        disabled: isLocked
+    });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -17,9 +24,16 @@ const SortableItem = ({ bookmark, onDelete }: { bookmark: Bookmark; onDelete: (i
 
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={styles.bookmarkItem}>
-            <a href={bookmark.url} className={styles.link} onClick={() => {
-                // Prevent navigation if we are dragging
-            }}>
+            <a
+                href={bookmark.url}
+                className={styles.link}
+                onClick={(e) => {
+                    if (!isLocked) {
+                        e.preventDefault();
+                    }
+                }}
+                style={{ cursor: isLocked ? 'pointer' : 'move' }}
+            >
                 <div className={styles.iconContainer}>
                     {bookmark.icon ? (
                         <img src={bookmark.icon} alt={bookmark.title} className={styles.icon} />
@@ -29,28 +43,34 @@ const SortableItem = ({ bookmark, onDelete }: { bookmark: Bookmark; onDelete: (i
                 </div>
                 <span className={styles.title}>{bookmark.title}</span>
             </a>
-            <button
-                className={styles.deleteBtn}
-                onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onDelete(bookmark.id);
-                }}
-                onPointerDown={(e) => e.stopPropagation()} // Prevent drag start on delete button
-            >
-                <FaTimes />
-            </button>
+            {!isLocked && (
+                <button
+                    className={styles.deleteBtn}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onDelete(bookmark.id);
+                    }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                >
+                    <FaTimes />
+                </button>
+            )}
         </div>
     );
 };
 
-export const Bookmarks: React.FC = () => {
+export const Bookmarks: React.FC<BookmarksProps> = ({ isLocked }) => {
     const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
     const [isAdding, setIsAdding] = useState(false);
     const [newBookmark, setNewBookmark] = useState({ title: '', url: '' });
 
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
@@ -61,7 +81,6 @@ export const Bookmarks: React.FC = () => {
         if (saved) {
             setBookmarks(JSON.parse(saved));
         } else {
-            // Default bookmarks
             const defaults: Bookmark[] = [
                 { id: '1', title: 'Google', url: 'https://google.com', icon: 'https://www.google.com/s2/favicons?domain=google.com&sz=64' },
                 { id: '2', title: 'GitHub', url: 'https://github.com', icon: 'https://www.google.com/s2/favicons?domain=github.com&sz=64' },
@@ -125,12 +144,19 @@ export const Bookmarks: React.FC = () => {
                 >
                     <div className={styles.grid}>
                         {bookmarks.map((bookmark) => (
-                            <SortableItem key={bookmark.id} bookmark={bookmark} onDelete={handleDelete} />
+                            <SortableItem
+                                key={bookmark.id}
+                                bookmark={bookmark}
+                                onDelete={handleDelete}
+                                isLocked={isLocked}
+                            />
                         ))}
 
-                        <button className={styles.addBtn} onClick={() => setIsAdding(true)}>
-                            <FaPlus />
-                        </button>
+                        {!isLocked && (
+                            <button className={styles.addBtn} onClick={() => setIsAdding(true)}>
+                                <FaPlus />
+                            </button>
+                        )}
                     </div>
                 </SortableContext>
             </DndContext>
@@ -138,9 +164,9 @@ export const Bookmarks: React.FC = () => {
             {isAdding && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modal}>
-                        <h3>Add Bookmark</h3>
+                        <h3>{navigator.language.startsWith('zh') ? '添加书签' : 'Add Bookmark'}</h3>
                         <input
-                            placeholder="Title"
+                            placeholder={navigator.language.startsWith('zh') ? '标题' : 'Title'}
                             value={newBookmark.title}
                             onChange={e => setNewBookmark({ ...newBookmark, title: e.target.value })}
                         />
@@ -150,8 +176,8 @@ export const Bookmarks: React.FC = () => {
                             onChange={e => setNewBookmark({ ...newBookmark, url: e.target.value })}
                         />
                         <div className={styles.modalActions}>
-                            <button onClick={() => setIsAdding(false)}>Cancel</button>
-                            <button onClick={handleAdd}>Save</button>
+                            <button onClick={() => setIsAdding(false)}>{navigator.language.startsWith('zh') ? '取消' : 'Cancel'}</button>
+                            <button onClick={handleAdd}>{navigator.language.startsWith('zh') ? '保存' : 'Save'}</button>
                         </div>
                     </div>
                 </div>

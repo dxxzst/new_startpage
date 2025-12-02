@@ -9,6 +9,8 @@ export interface WeatherData {
   weatherCode: number;
   isDay: boolean;
   city: string;
+  minTemp?: number;
+  maxTemp?: number;
 }
 
 export interface Bookmark {
@@ -20,12 +22,13 @@ export interface Bookmark {
 
 export type SearchEngine = 'google' | 'baidu' | 'bing';
 
+export type WallpaperEffect = 'none' | 'blur' | 'glass';
+
 export interface AppSettings {
   timeFormat: '12' | '24';
   searchEngine: SearchEngine;
-  location?: {
-    lat: number;
-    lon: number;
-    city: string;
-  };
+  wallpaperEffect: WallpaperEffect;
+  isLocked: boolean;
+  showWeather: boolean;
+  manualLocation?: string; // City name or "lat,lon"
 }
