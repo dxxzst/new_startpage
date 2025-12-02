@@ -1,0 +1,35 @@
+.weatherContainer {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 10px 15px;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.icon {
+    font-size: 2rem;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+}
+
+.temp {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.city {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
