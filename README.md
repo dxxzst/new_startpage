@@ -1,75 +1,105 @@
-# Chrome 新标签页扩展 (New Tab Start Page)
+# Chrome New Tab Start Page Extension
 
-这是一个基于 **Vite + React + TypeScript** 开发的 Chrome 浏览器扩展，旨在替换默认的新标签页，提供美观、高效的起始页体验。
+[简体中文](./README.zh-CN.md) | English
 
-## ✨ 主要功能
+A modern Chrome extension built with **Vite + React + TypeScript** that replaces the default new tab page with a beautiful, efficient start page experience.
 
--   **🌅 每日壁纸**: 自动获取 Bing 每日精选图片作为背景。
-    -   **多种特效**: 支持无特效、模糊 (Blur)、毛玻璃 (Glass) 三种显示模式。
-    -   **自动刷新**: 可设置每日、每 1/6/12 小时自动刷新壁纸。
-    -   **手动刷新**: 左下角提供随机刷新按钮，可随机获取过去 8 天的 Bing 壁纸。
--   **⏰ 实时时钟**: 页面中央显示当前时间与日期，自动适配浏览器语言格式。
--   **🌤️ 天气组件**: 
-    -   显示实时温度、天气状况及当日最高/最低温。
-    -   支持自动定位或手动输入城市名称。
-    -   可在设置中开启/关闭显示。
--   **🔍 多引擎搜索**: 内置 Google, Baidu, Bing 搜索引擎，支持自定义切换。
--   **🔖 书签管理**: 
-    -   **网格布局**: 支持自定义每行显示 3-10 个书签 (默认 6 个)。
-    -   **编辑模式**: 提供锁定/解锁功能。解锁状态下可拖拽排序、删除、编辑书签信息。
-    -   **自定义图标**: 支持输入图标 URL，或一键获取网站默认 Favicon。
-    -   **防误触**: 编辑模式下点击书签不会跳转，防止误操作。
--   **⚙️ 个性化设置**: 
-    -   **数据备份**: 支持导入/导出所有配置（包括书签、壁纸设置、布局设置等）。
-    -   **界面定制**: 丰富的自定义选项，打造专属起始页。
--   **🎨 现代设计**: 深度优化的 Glassmorphism 风格，精致的圆角与阴影细节。
+## ✨ Features
 
-## 🚀 开发指南
+### 🌅 Daily Wallpaper
+- Automatically fetches Bing's daily featured images as background
+- **Multiple Effects**: Support for None, Blur, and Glass display modes
+- **Auto Refresh**: Configurable refresh intervals (daily, 1/6/12 hours)
+- **Manual Refresh**: Random refresh button in the bottom-left corner to get Bing wallpapers from the past 8 days
 
-### 环境要求
--   Node.js (推荐 v16+)
--   npm 或 yarn
+### ⏰ Real-Time Clock
+- Displays current time and date in the center of the page
+- Automatically adapts to browser language format
+- Supports 12/24-hour time format switching
 
-### 安装依赖
+### 🌤️ Weather Widget
+- Shows real-time temperature, weather conditions, and daily high/low temperatures
+- Supports automatic geolocation or manual city input
+- Can be toggled on/off in settings
+
+### 🔍 Multi-Engine Search
+- Built-in Google, Baidu, and Bing search engines
+- Supports custom search engine switching
+
+### 🔖 Bookmark Management
+- **Grid Layout**: Customize 3-10 bookmarks per row (default 6)
+- **Edit Mode**: Lock/unlock functionality for drag-and-drop sorting, deletion, and editing
+- **Custom Icons**: Support for icon URL input or one-click favicon retrieval
+- **Accidental Click Prevention**: Clicking bookmarks in edit mode won't navigate away
+
+### 🌐 Multilingual Support (i18n)
+- **23 Languages Supported**: Including Chinese (Simplified/Traditional), English, Spanish, Arabic, French, Persian, German, Russian, Malay, Portuguese, Italian, Turkish, Kannada, Tamil, Urdu, Korean, Hindi, Bengali, Japanese, Vietnamese, Telugu, and Marathi
+- **Auto-Detection**: Automatically detects browser language on first load
+- **Manual Override**: Select any language from Settings
+- **Persistent**: Language choice saved and included in configuration export/import
+
+### ⚙️ Personalized Settings
+- **Data Backup**: Import/export all configurations (bookmarks, wallpaper settings, layout, etc.)
+- **Interface Customization**: Rich customization options to create your own start page
+
+### 🎨 Modern Design
+- Deeply optimized Glassmorphism style
+- Refined rounded corners and shadow details
+
+## 📸 Screenshots
+
+### Main Interface
+![Main Interface](./src/assets/main.png)
+
+### Settings Panel
+![Settings Panel](./src/assets/setting.png)
+
+## 🚀 Development Guide
+
+### Requirements
+- Node.js (v16+ recommended)
+- npm or yarn
+
+### Install Dependencies
 ```bash
 npm install
 ```
 
-### 启动开发服务器
-如果您想在浏览器中以普通网页形式调试 UI：
+### Start Development Server
+To debug the UI as a regular web page in your browser:
 ```bash
 npm run dev
 ```
 
-### 构建扩展
-构建生产环境代码，输出到 `dist` 目录：
+### Build Extension
+Build production code, output to `dist` directory:
 ```bash
 npm run build
 ```
 
-## 📦 安装到 Chrome
+## 📦 Install to Chrome
 
-1.  运行 `npm run build` 生成 `dist` 目录。
-2.  打开 Chrome 浏览器，在地址栏输入 `chrome://extensions` 并回车。
-3.  在页面右上角开启 **"开发者模式" (Developer mode)**。
-4.  点击左上角的 **"加载已解压的扩展程序" (Load unpacked)** 按钮。
-5.  选择本项目根目录下的 `dist` 文件夹。
-6.  安装完成后，打开一个新的标签页 (New Tab)，即可看到效果。
+1. Run `npm run build` to generate the `dist` directory.
+2. Open Chrome browser and navigate to `chrome://extensions`.
+3. Enable **"Developer mode"** in the top-right corner.
+4. Click the **"Load unpacked"** button in the top-left.
+5. Select the `dist` folder from this project's root directory.
+6. After installation, open a new tab to see the extension in action.
 
-## 🛠️ 技术栈
+## 🛠️ Tech Stack
 
--   [Vite](https://vitejs.dev/) - 下一代前端构建工具
--   [React](https://reactjs.org/) - 用于构建用户界面的 JavaScript 库
--   [TypeScript](https://www.typescriptlang.org/) - 以此获得更好的开发体验和代码质量
--   [dnd-kit](https://dndkit.com/) - 轻量级、高性能的拖拽库
--   [Open-Meteo](https://open-meteo.com/) - 免费的天气 API
--   [React Icons](https://react-icons.github.io/react-icons/) - 丰富的图标库
+- [Vite](https://vitejs.dev/) - Next-generation frontend build tool
+- [React](https://reactjs.org/) - JavaScript library for building user interfaces
+- [TypeScript](https://www.typescriptlang.org/) - For better development experience and code quality
+- [dnd-kit](https://dndkit.com/) - Lightweight, high-performance drag-and-drop library
+- [Open-Meteo](https://open-meteo.com/) - Free weather API
+- [React Icons](https://react-icons.github.io/react-icons/) - Comprehensive icon library
 
-## 📝 注意事项
+## 📝 Notes
 
--   **天气定位**: 首次打开时，浏览器会询问是否允许获取位置信息，请选择“允许”以显示当地天气。如需手动设置，可在设置面板中输入城市拼音（如 Beijing）。
--   **壁纸缓存**: 系统会自动缓存壁纸以优化加载速度，您也可以通过左下角的刷新按钮手动更新。
--   **书签图标**: 部分网站可能无法直接获取 Favicon，您可以手动输入图标图片的 URL 地址。
+- **Weather Geolocation**: On first launch, the browser will ask for location permission. Please allow to display local weather. For manual setup, enter the city name (e.g., London) in the settings panel.
+- **Wallpaper Caching**: The system automatically caches wallpapers to optimize loading speed. You can also manually refresh via the button in the bottom-left corner.
+- **Bookmark Icons**: Some websites may not provide favicons directly. You can manually enter the icon image URL.
 
 ---
 
