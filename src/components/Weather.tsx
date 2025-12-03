@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { WeatherData } from '../types';
 import { fetchWeather } from '../services/weatherService';
 import { WiDaySunny, WiCloudy, WiRain, WiSnow, WiThunderstorm } from 'react-icons/wi';
+import { useTranslation } from '../i18n';
 import styles from './Weather.module.css';
 
 interface WeatherProps {
@@ -13,6 +14,7 @@ export const Weather: React.FC<WeatherProps> = ({ show, manualLocation }) => {
     const [weather, setWeather] = useState<WeatherData | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (!show) return;
@@ -31,7 +33,7 @@ export const Weather: React.FC<WeatherProps> = ({ show, manualLocation }) => {
             .catch((err) => {
                 if (isActive) {
                     console.error(err);
-                    setError('Weather unavailable');
+                    setError(t.weather.unavailable);
                     setIsLoading(false);
                 }
             });

@@ -3,6 +3,7 @@ import type { SearchEngine } from '../types';
 import { FaGoogle, FaSearch, FaWindows } from 'react-icons/fa';
 import { SiBaidu } from 'react-icons/si';
 import { IoMdArrowDropdown } from 'react-icons/io';
+import { useTranslation } from '../i18n';
 import styles from './Search.module.css';
 
 const ENGINES: Record<SearchEngine, { url: string; icon: React.ReactNode; name: string }> = {
@@ -16,6 +17,7 @@ export const Search: React.FC = () => {
     const [engine, setEngine] = useState<SearchEngine>('bing');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const savedEngine = localStorage.getItem('searchEngine') as SearchEngine;
@@ -76,7 +78,7 @@ export const Search: React.FC = () => {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={navigator.language.startsWith('zh') ? "搜索..." : "Search..."}
+                placeholder={t.search.placeholder}
                 className={styles.input}
                 autoFocus
             />

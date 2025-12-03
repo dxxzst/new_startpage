@@ -33,4 +33,6 @@ export interface AppSettings {
   manualLocation?: string;
   wallpaperRefreshInterval: number; // in hours, 0 = disabled (daily default)
   gridColumns: number;
+  language: string; // Language code
 }
+

@@ -4,6 +4,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { FaPlus, FaTimes, FaPen } from 'react-icons/fa';
+import { useTranslation } from '../i18n';
 import styles from './Bookmarks.module.css';
 
 interface BookmarksProps {
@@ -91,6 +92,7 @@ export const Bookmarks: React.FC<BookmarksProps> = ({ isLocked, gridColumns }) =
     const [formData, setFormData] = useState({ title: '', url: '', icon: '' });
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const { t } = useTranslation();
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -248,12 +250,10 @@ export const Bookmarks: React.FC<BookmarksProps> = ({ isLocked, gridColumns }) =
                 <div className={styles.modalOverlay}>
                     <div className={styles.modal}>
                         <h3>
-                            {navigator.language.startsWith('zh')
-                                ? (editingId ? '编辑书签' : '添加书签')
-                                : (editingId ? 'Edit Bookmark' : 'Add Bookmark')}
+                            {editingId ? t.bookmarks.edit : t.bookmarks.add}
                         </h3>
                         <input
-                            placeholder={navigator.language.startsWith('zh') ? '标题' : 'Title'}
+                            placeholder={t.bookmarks.title}
                             value={formData.title}
                             onChange={e => setFormData({ ...formData, title: e.target.value })}
                         />
@@ -264,19 +264,19 @@ export const Bookmarks: React.FC<BookmarksProps> = ({ isLocked, gridColumns }) =
                         />
                         <div className={styles.iconInputGroup}>
                             <input
-                                placeholder={navigator.language.startsWith('zh') ? '图标 URL (可选)' : 'Icon URL (Optional)'}
+                                placeholder={t.bookmarks.iconUrlOptional}
                                 value={formData.icon}
                                 onChange={e => setFormData({ ...formData, icon: e.target.value })}
                             />
                             <button onClick={handleUseDefaultIcon} className={styles.smallBtn} title="Use Default Icon">
-                                {navigator.language.startsWith('zh') ? '默认' : 'Default'}
+                                {t.bookmarks.defaultIcon}
                             </button>
                         </div>
 
                         <div className={styles.modalActions}>
-                            <button onClick={() => setIsModalOpen(false)}>{navigator.language.startsWith('zh') ? '取消' : 'Cancel'}</button>
+                            <button onClick={() => setIsModalOpen(false)}>{t.bookmarks.cancel}</button>
                             <button onClick={handleSave} disabled={isLoading}>
-                                {isLoading ? '...' : (navigator.language.startsWith('zh') ? '保存' : 'Save')}
+                                {isLoading ? t.bookmarks.saving : t.bookmarks.save}
                             </button>
                         </div>
                     </div>

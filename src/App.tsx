@@ -5,6 +5,7 @@ import { Search } from './components/Search';
 import { Bookmarks } from './components/Bookmarks';
 import { Settings } from './components/Settings';
 import { fetchBingWallpaper } from './services/bingService';
+import { LanguageProvider } from './i18n';
 import type { Wallpaper, WallpaperEffect } from './types';
 import { FaSyncAlt } from 'react-icons/fa';
 import './App.css';
@@ -93,52 +94,54 @@ function App() {
   };
 
   return (
-    <div
-      className={`app-container effect-${effect}`}
-      style={{
-        backgroundImage: wallpaper ? `url(${wallpaper.url})` : 'none',
-        backgroundColor: '#333'
-      }}
-    >
-      <div className="content-wrapper">
-        <div className="weather-wrapper">
-          <Weather show={showWeather} manualLocation={manualLocation} />
-        </div>
-        <div className="center-content">
-          <Clock format24={timeFormat === '24'} />
-          <Search />
-          <Bookmarks isLocked={isLocked} gridColumns={gridColumns} />
-        </div>
+    <LanguageProvider>
+      <div
+        className={`app-container effect-${effect}`}
+        style={{
+          backgroundImage: wallpaper ? `url(${wallpaper.url})` : 'none',
+          backgroundColor: '#333'
+        }}
+      >
+        <div className="content-wrapper">
+          <div className="weather-wrapper">
+            <Weather show={showWeather} manualLocation={manualLocation} />
+          </div>
+          <div className="center-content">
+            <Clock format24={timeFormat === '24'} />
+            <Search />
+            <Bookmarks isLocked={isLocked} gridColumns={gridColumns} />
+          </div>
 
-        <Settings
-          effect={effect}
-          onEffectChange={handleEffectChange}
-          isLocked={isLocked}
-          onToggleLock={toggleLock}
-          showWeather={showWeather}
-          onToggleWeather={toggleWeather}
-          manualLocation={manualLocation}
-          onLocationChange={handleLocationChange}
-          refreshInterval={refreshInterval}
-          onIntervalChange={handleIntervalChange}
-          gridColumns={gridColumns}
-          onGridColumnsChange={handleGridColumnsChange}
-          timeFormat={timeFormat}
-          onTimeFormatChange={handleTimeFormatChange}
-        />
+          <Settings
+            effect={effect}
+            onEffectChange={handleEffectChange}
+            isLocked={isLocked}
+            onToggleLock={toggleLock}
+            showWeather={showWeather}
+            onToggleWeather={toggleWeather}
+            manualLocation={manualLocation}
+            onLocationChange={handleLocationChange}
+            refreshInterval={refreshInterval}
+            onIntervalChange={handleIntervalChange}
+            gridColumns={gridColumns}
+            onGridColumnsChange={handleGridColumnsChange}
+            timeFormat={timeFormat}
+            onTimeFormatChange={handleTimeFormatChange}
+          />
 
-        <div className="bottom-left-controls">
-          <button className="refresh-btn" onClick={() => refreshWallpaper(true)} title="Random Wallpaper">
-            <FaSyncAlt />
-          </button>
-          {wallpaper && (
-            <div className="wallpaper-info">
-              {wallpaper.copyright}
-            </div>
-          )}
+          <div className="bottom-left-controls">
+            <button className="refresh-btn" onClick={() => refreshWallpaper(true)} title="Random Wallpaper">
+              <FaSyncAlt />
+            </button>
+            {wallpaper && (
+              <div className="wallpaper-info">
+                {wallpaper.copyright}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </LanguageProvider>
   );
 }
 
