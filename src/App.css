@@ -55,6 +55,13 @@
   z-index: 10;
 }
 
+.weather-wrapper {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  z-index: 100;
+}
+
 .bottom-left-controls {
   position: absolute;
   bottom: 20px;

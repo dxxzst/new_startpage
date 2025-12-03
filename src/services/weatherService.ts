@@ -41,8 +41,8 @@ export const fetchWeather = async (manualLocation?: string): Promise<WeatherData
             const geoResponse = await axios.get(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`
             );
-            if (geoResponse.data && geoResponse.data.address) {
-                cityName = geoResponse.data.address.city || geoResponse.data.address.town || geoResponse.data.address.village || 'Local';
+            if (geoResponse.data) {
+                cityName = geoResponse.data.name || 'Local';
             }
         } catch (e) {
             console.warn('Failed to fetch city name', e);

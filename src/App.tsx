@@ -11,34 +11,16 @@ import './App.css';
 
 function App() {
   const [wallpaper, setWallpaper] = useState<Wallpaper | null>(null);
-  const [effect, setEffect] = useState<WallpaperEffect>('none');
-  const [isLocked, setIsLocked] = useState(false);
-  const [showWeather, setShowWeather] = useState(true);
-  const [manualLocation, setManualLocation] = useState('');
-  const [refreshInterval, setRefreshInterval] = useState(0); // 0 = daily (default)
-  const [gridColumns, setGridColumns] = useState(6);
+  const [effect, setEffect] = useState<WallpaperEffect>(() => (localStorage.getItem('wallpaperEffect') as WallpaperEffect) || 'none');
+  const [isLocked, setIsLocked] = useState(() => localStorage.getItem('isLocked') === 'true');
+  const [showWeather, setShowWeather] = useState(() => localStorage.getItem('showWeather') !== 'false');
+  const [manualLocation, setManualLocation] = useState(() => localStorage.getItem('manualLocation') || '');
+  const [refreshInterval, setRefreshInterval] = useState(() => Number(localStorage.getItem('wallpaperRefreshInterval') || 0));
+  const [gridColumns, setGridColumns] = useState(() => Number(localStorage.getItem('gridColumns') || 6));
+  const [timeFormat, setTimeFormat] = useState<'12' | '24'>(() => (localStorage.getItem('timeFormat') as '12' | '24') || '24');
 
   useEffect(() => {
-    // Load settings
-    const savedEffect = localStorage.getItem('wallpaperEffect') as WallpaperEffect;
-    if (savedEffect) setEffect(savedEffect);
-
-    const savedLock = localStorage.getItem('isLocked');
-    if (savedLock) setIsLocked(savedLock === 'true');
-
-    const savedShowWeather = localStorage.getItem('showWeather');
-    if (savedShowWeather !== null) setShowWeather(savedShowWeather === 'true');
-
-    const savedLocation = localStorage.getItem('manualLocation');
-    if (savedLocation) setManualLocation(savedLocation);
-
-    const savedInterval = localStorage.getItem('wallpaperRefreshInterval');
-    if (savedInterval) setRefreshInterval(Number(savedInterval));
-
-    const savedColumns = localStorage.getItem('gridColumns');
-    if (savedColumns) setGridColumns(Number(savedColumns));
-
-    checkAndLoadWallpaper(Number(savedInterval || 0));
+    checkAndLoadWallpaper(refreshInterval);
   }, []);
 
   const checkAndLoadWallpaper = async (interval: number) => {
@@ -105,6 +87,11 @@ function App() {
     localStorage.setItem('gridColumns', String(columns));
   };
 
+  const handleTimeFormatChange = (format: '12' | '24') => {
+    setTimeFormat(format);
+    localStorage.setItem('timeFormat', format);
+  };
+
   return (
     <div
       className={`app-container effect-${effect}`}
@@ -114,9 +101,11 @@ function App() {
       }}
     >
       <div className="content-wrapper">
-        <Weather show={showWeather} manualLocation={manualLocation} />
+        <div className="weather-wrapper">
+          <Weather show={showWeather} manualLocation={manualLocation} />
+        </div>
         <div className="center-content">
-          <Clock />
+          <Clock format24={timeFormat === '24'} />
           <Search />
           <Bookmarks isLocked={isLocked} gridColumns={gridColumns} />
         </div>
@@ -134,6 +123,8 @@ function App() {
           onIntervalChange={handleIntervalChange}
           gridColumns={gridColumns}
           onGridColumnsChange={handleGridColumnsChange}
+          timeFormat={timeFormat}
+          onTimeFormatChange={handleTimeFormatChange}
         />
 
         <div className="bottom-left-controls">

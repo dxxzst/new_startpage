@@ -12,22 +12,44 @@ interface WeatherProps {
 export const Weather: React.FC<WeatherProps> = ({ show, manualLocation }) => {
     const [weather, setWeather] = useState<WeatherData | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (!show) return;
 
-        setWeather(null);
+        let isActive = true;
+        setIsLoading(true);
         setError(null);
 
         fetchWeather(manualLocation)
-            .then(setWeather)
+            .then((data) => {
+                if (isActive) {
+                    setWeather(data);
+                    setIsLoading(false);
+                }
+            })
             .catch((err) => {
-                console.error(err);
-                setError('Weather unavailable');
+                if (isActive) {
+                    console.error(err);
+                    setError('Weather unavailable');
+                    setIsLoading(false);
+                }
             });
+
+        return () => {
+            isActive = false;
+        };
     }, [show, manualLocation]);
 
-    if (!show || (!weather && !error)) return null;
+    if (!show) return null;
+
+    if (isLoading && !weather) {
+        return (
+            <div className={`${styles.weatherContainer} ${styles.loading}`}>
+                <div className={styles.spinner}></div>
+            </div>
+        );
+    }
 
     if (error) {
         return (
