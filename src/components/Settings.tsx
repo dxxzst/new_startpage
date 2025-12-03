@@ -12,13 +12,19 @@ interface SettingsProps {
     onToggleWeather: () => void;
     manualLocation: string;
     onLocationChange: (location: string) => void;
+    refreshInterval: number;
+    onIntervalChange: (interval: number) => void;
+    gridColumns: number;
+    onGridColumnsChange: (columns: number) => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({
     effect, onEffectChange,
     isLocked, onToggleLock,
     showWeather, onToggleWeather,
-    manualLocation, onLocationChange
+    manualLocation, onLocationChange,
+    refreshInterval, onIntervalChange,
+    gridColumns, onGridColumnsChange
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [locationInput, setLocationInput] = useState(manualLocation || '');
@@ -32,7 +38,9 @@ export const Settings: React.FC<SettingsProps> = ({
             wallpaperEffect: localStorage.getItem('wallpaperEffect') || 'none',
             isLocked: localStorage.getItem('isLocked') === 'true',
             showWeather: localStorage.getItem('showWeather') !== 'false',
-            manualLocation: localStorage.getItem('manualLocation') || ''
+            manualLocation: localStorage.getItem('manualLocation') || '',
+            wallpaperRefreshInterval: localStorage.getItem('wallpaperRefreshInterval') || '0',
+            gridColumns: localStorage.getItem('gridColumns') || '6'
         };
 
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -60,6 +68,8 @@ export const Settings: React.FC<SettingsProps> = ({
                 if (data.isLocked !== undefined) localStorage.setItem('isLocked', String(data.isLocked));
                 if (data.showWeather !== undefined) localStorage.setItem('showWeather', String(data.showWeather));
                 if (data.manualLocation !== undefined) localStorage.setItem('manualLocation', data.manualLocation);
+                if (data.wallpaperRefreshInterval !== undefined) localStorage.setItem('wallpaperRefreshInterval', data.wallpaperRefreshInterval);
+                if (data.gridColumns !== undefined) localStorage.setItem('gridColumns', String(data.gridColumns));
 
                 alert(isZh ? '配置导入成功！正在刷新...' : 'Configuration imported successfully! Refreshing...');
                 window.location.reload();
@@ -96,16 +106,32 @@ export const Settings: React.FC<SettingsProps> = ({
                         <h2>{isZh ? '设置' : 'Settings'}</h2>
 
                         <div className={styles.section}>
-                            <h3>{isZh ? '壁纸特效' : 'Wallpaper Effect'}</h3>
-                            <select
-                                value={effect}
-                                onChange={(e) => onEffectChange(e.target.value as WallpaperEffect)}
-                                className={styles.select}
-                            >
-                                <option value="none">{isZh ? '无' : 'None'}</option>
-                                <option value="blur">{isZh ? '模糊' : 'Blur'}</option>
-                                <option value="glass">{isZh ? '毛玻璃' : 'Glass'}</option>
-                            </select>
+                            <h3>{isZh ? '壁纸设置' : 'Wallpaper Settings'}</h3>
+                            <div className={styles.settingRow}>
+                                <label>{isZh ? '特效' : 'Effect'}:</label>
+                                <select
+                                    value={effect}
+                                    onChange={(e) => onEffectChange(e.target.value as WallpaperEffect)}
+                                    className={styles.select}
+                                >
+                                    <option value="none">{isZh ? '无' : 'None'}</option>
+                                    <option value="blur">{isZh ? '模糊' : 'Blur'}</option>
+                                    <option value="glass">{isZh ? '毛玻璃' : 'Glass'}</option>
+                                </select>
+                            </div>
+                            <div className={styles.settingRow}>
+                                <label>{isZh ? '自动刷新' : 'Auto Refresh'}:</label>
+                                <select
+                                    value={refreshInterval}
+                                    onChange={(e) => onIntervalChange(Number(e.target.value))}
+                                    className={styles.select}
+                                >
+                                    <option value="0">{isZh ? '每天' : 'Daily'}</option>
+                                    <option value="1">{isZh ? '每1小时' : 'Every 1 Hour'}</option>
+                                    <option value="6">{isZh ? '每6小时' : 'Every 6 Hours'}</option>
+                                    <option value="12">{isZh ? '每12小时' : 'Every 12 Hours'}</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div className={styles.section}>
@@ -133,6 +159,21 @@ export const Settings: React.FC<SettingsProps> = ({
                                     </button>
                                 </div>
                             )}
+                        </div>
+
+                        <div className={styles.section}>
+                            <h3>{isZh ? '布局设置' : 'Layout Settings'}</h3>
+                            <div className={styles.settingRow}>
+                                <label>{isZh ? '每行个数' : 'Columns'}:</label>
+                                <input
+                                    type="number"
+                                    min="3"
+                                    max="10"
+                                    value={gridColumns}
+                                    onChange={(e) => onGridColumnsChange(Number(e.target.value))}
+                                    className={styles.input}
+                                />
+                            </div>
                         </div>
 
                         <div className={styles.section}>

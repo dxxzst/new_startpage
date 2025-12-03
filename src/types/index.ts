@@ -30,5 +30,7 @@ export interface AppSettings {
   wallpaperEffect: WallpaperEffect;
   isLocked: boolean;
   showWeather: boolean;
-  manualLocation?: string; // City name or "lat,lon"
+  manualLocation?: string;
+  wallpaperRefreshInterval: number; // in hours, 0 = disabled (daily default)
+  gridColumns: number;
 }

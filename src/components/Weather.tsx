@@ -55,13 +55,13 @@ export const Weather: React.FC<WeatherProps> = ({ show, manualLocation }) => {
             </div>
             <div className={styles.info}>
                 <div className={styles.mainInfo}>
-                    <span className={styles.temp}>{weather.temperature}°C</span>
+                    <span className={styles.temp}>{Math.round(weather.temperature)}°C</span>
                     <span className={styles.city}>{weather.city}</span>
                 </div>
                 {(weather.maxTemp !== undefined && weather.minTemp !== undefined) && (
                     <div className={styles.details}>
-                        <span className={styles.detailItem}>H: {weather.maxTemp}°</span>
-                        <span className={styles.detailItem}>L: {weather.minTemp}°</span>
+                        <span className={styles.detailItem}>H: {Math.round(weather.maxTemp)}°</span>
+                        <span className={styles.detailItem}>L: {Math.round(weather.minTemp)}°</span>
                     </div>
                 )}
             </div>

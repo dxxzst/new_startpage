@@ -3,15 +3,16 @@ import type { Bookmark } from '../types';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { FaPlus, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaPen } from 'react-icons/fa';
 import styles from './Bookmarks.module.css';
 
 interface BookmarksProps {
     isLocked: boolean;
+    gridColumns: number;
 }
 
 // Sortable Item Component
-const SortableItem = ({ bookmark, onDelete, isLocked }: { bookmark: Bookmark; onDelete: (id: string) => void; isLocked: boolean }) => {
+const SortableItem = ({ bookmark, onDelete, onEdit, isLocked }: { bookmark: Bookmark; onDelete: (id: string) => void; onEdit: (bookmark: Bookmark) => void; isLocked: boolean }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
         id: bookmark.id,
         disabled: isLocked
@@ -24,46 +25,72 @@ const SortableItem = ({ bookmark, onDelete, isLocked }: { bookmark: Bookmark; on
 
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={styles.bookmarkItem}>
-            <a
-                href={bookmark.url}
-                className={styles.link}
-                onClick={(e) => {
-                    if (!isLocked) {
-                        e.preventDefault();
-                    }
-                }}
-                style={{ cursor: isLocked ? 'pointer' : 'move' }}
-            >
-                <div className={styles.iconContainer}>
-                    {bookmark.icon ? (
-                        <img src={bookmark.icon} alt={bookmark.title} className={styles.icon} />
-                    ) : (
-                        <div className={styles.fallbackIcon}>{bookmark.title.charAt(0).toUpperCase()}</div>
-                    )}
-                </div>
-                <span className={styles.title}>{bookmark.title}</span>
-            </a>
-            {!isLocked && (
-                <button
-                    className={styles.deleteBtn}
-                    onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onDelete(bookmark.id);
-                    }}
-                    onPointerDown={(e) => e.stopPropagation()}
+            {isLocked ? (
+                <a
+                    href={bookmark.url}
+                    className={styles.link}
+                    style={{ cursor: 'pointer' }}
                 >
-                    <FaTimes />
-                </button>
+                    <div className={styles.iconContainer}>
+                        {bookmark.icon ? (
+                            <img src={bookmark.icon} alt={bookmark.title} className={styles.icon} />
+                        ) : (
+                            <div className={styles.fallbackIcon}>{bookmark.title.charAt(0).toUpperCase()}</div>
+                        )}
+                    </div>
+                    <span className={styles.title}>{bookmark.title}</span>
+                </a>
+            ) : (
+                <div
+                    className={styles.link}
+                    style={{ cursor: 'move' }}
+                >
+                    <div className={styles.iconContainer}>
+                        {bookmark.icon ? (
+                            <img src={bookmark.icon} alt={bookmark.title} className={styles.icon} />
+                        ) : (
+                            <div className={styles.fallbackIcon}>{bookmark.title.charAt(0).toUpperCase()}</div>
+                        )}
+                    </div>
+                    <span className={styles.title}>{bookmark.title}</span>
+                </div>
+            )}
+            {!isLocked && (
+                <>
+                    <button
+                        className={styles.editBtn}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onEdit(bookmark);
+                        }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                    >
+                        <FaPen />
+                    </button>
+                    <button
+                        className={styles.deleteBtn}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onDelete(bookmark.id);
+                        }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                    >
+                        <FaTimes />
+                    </button>
+                </>
             )}
         </div>
     );
 };
 
-export const Bookmarks: React.FC<BookmarksProps> = ({ isLocked }) => {
+export const Bookmarks: React.FC<BookmarksProps> = ({ isLocked, gridColumns }) => {
     const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-    const [isAdding, setIsAdding] = useState(false);
-    const [newBookmark, setNewBookmark] = useState({ title: '', url: '' });
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [formData, setFormData] = useState({ title: '', url: '', icon: '' });
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -105,24 +132,76 @@ export const Bookmarks: React.FC<BookmarksProps> = ({ isLocked }) => {
         }
     };
 
-    const handleAdd = () => {
-        if (!newBookmark.title || !newBookmark.url) return;
+    const openAddModal = () => {
+        setEditingId(null);
+        setFormData({ title: '', url: '', icon: '' });
+        setIsModalOpen(true);
+    };
 
-        let url = newBookmark.url;
+    const openEditModal = (bookmark: Bookmark) => {
+        setEditingId(bookmark.id);
+        setFormData({ title: bookmark.title, url: bookmark.url, icon: bookmark.icon || '' });
+        setIsModalOpen(true);
+    };
+
+    const handleUseDefaultIcon = () => {
+        if (!formData.url) return;
+        let url = formData.url;
+        if (!url.startsWith('http')) url = 'https://' + url;
+        try {
+            const hostname = new URL(url).hostname;
+            const iconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
+            setFormData({ ...formData, icon: iconUrl });
+        } catch (e) {
+            console.error('Invalid URL', e);
+        }
+    };
+
+    const handleSave = async () => {
+        if (!formData.title || !formData.url) return;
+
+        setIsLoading(true);
+        let url = formData.url;
         if (!url.startsWith('http')) url = 'https://' + url;
 
-        const newItem: Bookmark = {
-            id: Date.now().toString(),
-            title: newBookmark.title,
-            url: url,
-            icon: `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=64`
-        };
+        try {
+            // Use provided icon or generate default if empty
+            let iconUrl = formData.icon;
+            if (!iconUrl) {
+                const hostname = new URL(url).hostname;
+                iconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
+            }
 
-        const updated = [...bookmarks, newItem];
-        setBookmarks(updated);
-        localStorage.setItem('bookmarks', JSON.stringify(updated));
-        setIsAdding(false);
-        setNewBookmark({ title: '', url: '' });
+            if (editingId) {
+                // Update existing
+                const updated = bookmarks.map(b =>
+                    b.id === editingId
+                        ? { ...b, title: formData.title, url: url, icon: iconUrl }
+                        : b
+                );
+                setBookmarks(updated);
+                localStorage.setItem('bookmarks', JSON.stringify(updated));
+            } else {
+                // Add new
+                const newItem: Bookmark = {
+                    id: Date.now().toString(),
+                    title: formData.title,
+                    url: url,
+                    icon: iconUrl
+                };
+                const updated = [...bookmarks, newItem];
+                setBookmarks(updated);
+                localStorage.setItem('bookmarks', JSON.stringify(updated));
+            }
+
+            setIsModalOpen(false);
+            setFormData({ title: '', url: '', icon: '' });
+            setEditingId(null);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleDelete = (id: string) => {
@@ -132,7 +211,7 @@ export const Bookmarks: React.FC<BookmarksProps> = ({ isLocked }) => {
     };
 
     return (
-        <div className={styles.container}>
+        <div className={styles.container} style={{ maxWidth: `${gridColumns * 100}px` }}>
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
@@ -142,18 +221,22 @@ export const Bookmarks: React.FC<BookmarksProps> = ({ isLocked }) => {
                     items={bookmarks.map(b => b.id)}
                     strategy={rectSortingStrategy}
                 >
-                    <div className={styles.grid}>
+                    <div
+                        className={styles.grid}
+                        style={{ gridTemplateColumns: `repeat(${gridColumns}, 1fr)` }}
+                    >
                         {bookmarks.map((bookmark) => (
                             <SortableItem
                                 key={bookmark.id}
                                 bookmark={bookmark}
                                 onDelete={handleDelete}
+                                onEdit={openEditModal}
                                 isLocked={isLocked}
                             />
                         ))}
 
                         {!isLocked && (
-                            <button className={styles.addBtn} onClick={() => setIsAdding(true)}>
+                            <button className={styles.addBtn} onClick={openAddModal}>
                                 <FaPlus />
                             </button>
                         )}
@@ -161,23 +244,40 @@ export const Bookmarks: React.FC<BookmarksProps> = ({ isLocked }) => {
                 </SortableContext>
             </DndContext>
 
-            {isAdding && (
+            {isModalOpen && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modal}>
-                        <h3>{navigator.language.startsWith('zh') ? '添加书签' : 'Add Bookmark'}</h3>
+                        <h3>
+                            {navigator.language.startsWith('zh')
+                                ? (editingId ? '编辑书签' : '添加书签')
+                                : (editingId ? 'Edit Bookmark' : 'Add Bookmark')}
+                        </h3>
                         <input
                             placeholder={navigator.language.startsWith('zh') ? '标题' : 'Title'}
-                            value={newBookmark.title}
-                            onChange={e => setNewBookmark({ ...newBookmark, title: e.target.value })}
+                            value={formData.title}
+                            onChange={e => setFormData({ ...formData, title: e.target.value })}
                         />
                         <input
                             placeholder="URL"
-                            value={newBookmark.url}
-                            onChange={e => setNewBookmark({ ...newBookmark, url: e.target.value })}
+                            value={formData.url}
+                            onChange={e => setFormData({ ...formData, url: e.target.value })}
                         />
+                        <div className={styles.iconInputGroup}>
+                            <input
+                                placeholder={navigator.language.startsWith('zh') ? '图标 URL (可选)' : 'Icon URL (Optional)'}
+                                value={formData.icon}
+                                onChange={e => setFormData({ ...formData, icon: e.target.value })}
+                            />
+                            <button onClick={handleUseDefaultIcon} className={styles.smallBtn} title="Use Default Icon">
+                                {navigator.language.startsWith('zh') ? '默认' : 'Default'}
+                            </button>
+                        </div>
+
                         <div className={styles.modalActions}>
-                            <button onClick={() => setIsAdding(false)}>{navigator.language.startsWith('zh') ? '取消' : 'Cancel'}</button>
-                            <button onClick={handleAdd}>{navigator.language.startsWith('zh') ? '保存' : 'Save'}</button>
+                            <button onClick={() => setIsModalOpen(false)}>{navigator.language.startsWith('zh') ? '取消' : 'Cancel'}</button>
+                            <button onClick={handleSave} disabled={isLoading}>
+                                {isLoading ? '...' : (navigator.language.startsWith('zh') ? '保存' : 'Save')}
+                            </button>
                         </div>
                     </div>
                 </div>

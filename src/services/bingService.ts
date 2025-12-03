@@ -1,31 +1,29 @@
 import axios from 'axios';
 import type { Wallpaper } from '../types';
 
-const BING_API_URL = 'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN';
-// const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/'; // Fallback or use a dedicated proxy if needed
-
-export const fetchBingWallpaper = async (): Promise<Wallpaper> => {
+export const fetchBingWallpaper = async (index: number = 0): Promise<Wallpaper> => {
     try {
-        // In a Chrome Extension, we might be able to bypass CORS if permissions are set correctly in manifest.json
-        // However, fetch might still be blocked by CORB/CORS in content scripts or some contexts.
-        // For a new tab page, it usually behaves like a web page.
-
-        const response = await axios.get(BING_API_URL);
+        // Bing Image Archive API
+        // idx: 0 = today, 1 = yesterday, etc. (up to 7)
+        // n: number of images
+        const response = await axios.get(`https://www.bing.com/HPImageArchive.aspx?format=js&idx=${index}&n=1&mkt=en-US`);
         const image = response.data.images[0];
-        const fullUrl = `https://www.bing.com${image.url}`;
+        const url = `https://www.bing.com${image.url}`;
+        const copyright = image.copyright;
+        const date = image.enddate;
 
         return {
-            url: fullUrl,
-            copyright: image.copyright,
-            date: image.startdate
+            url,
+            copyright,
+            date,
         };
     } catch (error) {
         console.error('Failed to fetch Bing wallpaper:', error);
-        // Return a default wallpaper or throw
+        // Fallback wallpaper
         return {
-            url: 'https://images.unsplash.com/photo-1477346611705-65d1883cee1e?auto=format&fit=crop&w=1920&q=80',
+            url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop',
             copyright: 'Default Wallpaper',
-            date: new Date().toISOString()
+            date: new Date().toISOString().split('T')[0].replace(/-/g, ''),
         };
     }
 };

@@ -1,39 +1,21 @@
 .container {
     width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
+    margin-top: 20px;
 }
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 20px;
-    padding: 20px;
+    justify-items: center;
 }
 
 .bookmarkItem {
     position: relative;
+    width: 80px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    /* Removed background for minimal look */
-    /* background: rgba(255, 255, 255, 0.15); */
-    /* backdrop-filter: blur(10px); */
-    border-radius: 15px;
-    padding: 10px;
-    cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
-    aspect-ratio: 1;
-    text-decoration: none;
-    color: white;
-}
-
-.bookmarkItem:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.1);
-    /* Subtle hover background */
-    border-radius: 15px;
+    touch-action: none;
 }
 
 .link {
@@ -41,82 +23,113 @@
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    color: inherit;
+    color: white;
     width: 100%;
-    height: 100%;
-    justify-content: center;
+    transition: transform 0.2s;
+}
+
+.link:hover {
+    transform: translateY(-5px);
 }
 
 .iconContainer {
-    width: 56px;
-    height: 56px;
-    margin-bottom: 10px;
+    width: 60px;
+    height: 60px;
     background: rgba(255, 255, 255, 0.9);
-    border-radius: 16px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    margin-bottom: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.link:hover .iconContainer {
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .icon {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
+    border-radius: 0;
     object-fit: contain;
 }
 
 .fallbackIcon {
     font-size: 28px;
     font-weight: bold;
-    color: #333;
+    color: #555;
 }
 
 .title {
-    font-size: 0.9rem;
+    font-size: 12px;
     text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .deleteBtn {
     position: absolute;
     top: -5px;
     right: -5px;
-    background: rgba(0, 0, 0, 0.6);
+    background: #ff4d4d;
+    color: white;
     border: none;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-size: 12px;
+    font-size: 10px;
     cursor: pointer;
     opacity: 0;
     transition: opacity 0.2s;
     z-index: 10;
 }
 
-.bookmarkItem:hover .deleteBtn {
+.editBtn {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+}
+
+.bookmarkItem:hover .deleteBtn,
+.bookmarkItem:hover .editBtn {
     opacity: 1;
 }
 
 .addBtn {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px dashed rgba(255, 255, 255, 0.3);
-    border-radius: 15px;
-    color: white;
-    font-size: 24px;
     cursor: pointer;
-    aspect-ratio: 1;
     transition: all 0.2s;
 }
 
@@ -125,51 +138,73 @@
     border-color: rgba(255, 255, 255, 0.5);
 }
 
-/* Modal Styles */
 .modalOverlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 2000;
     backdrop-filter: blur(5px);
 }
 
 .modal {
     background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 300px;
+    padding: 25px;
+    border-radius: 15px;
+    width: 350px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
     color: #333;
 }
 
+.modal h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
 .modal input {
-    padding: 8px;
+    padding: 10px;
+    border-radius: 8px;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    width: 100%;
+}
+
+.iconInputGroup {
+    display: flex;
+    gap: 10px;
+}
+
+.smallBtn {
+    padding: 0 15px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
 }
 
 .modalActions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-top: 10px;
 }
 
 .modalActions button {
-    padding: 5px 15px;
-    cursor: pointer;
+    padding: 8px 15px;
+    border-radius: 6px;
     border: none;
-    background: #eee;
-    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modalActions button:first-child {
+    background: #f0f0f0;
 }
 
 .modalActions button:last-child {

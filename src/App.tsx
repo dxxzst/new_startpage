@@ -6,6 +6,7 @@ import { Bookmarks } from './components/Bookmarks';
 import { Settings } from './components/Settings';
 import { fetchBingWallpaper } from './services/bingService';
 import type { Wallpaper, WallpaperEffect } from './types';
+import { FaSyncAlt } from 'react-icons/fa';
 import './App.css';
 
 function App() {
@@ -14,6 +15,8 @@ function App() {
   const [isLocked, setIsLocked] = useState(false);
   const [showWeather, setShowWeather] = useState(true);
   const [manualLocation, setManualLocation] = useState('');
+  const [refreshInterval, setRefreshInterval] = useState(0); // 0 = daily (default)
+  const [gridColumns, setGridColumns] = useState(6);
 
   useEffect(() => {
     // Load settings
@@ -29,23 +32,46 @@ function App() {
     const savedLocation = localStorage.getItem('manualLocation');
     if (savedLocation) setManualLocation(savedLocation);
 
-    const loadWallpaper = async () => {
-      const cached = localStorage.getItem('wallpaper');
-      const cachedDate = localStorage.getItem('wallpaperDate');
-      const today = new Date().toDateString();
+    const savedInterval = localStorage.getItem('wallpaperRefreshInterval');
+    if (savedInterval) setRefreshInterval(Number(savedInterval));
 
-      if (cached && cachedDate === today) {
-        setWallpaper(JSON.parse(cached));
-      } else {
-        const newWallpaper = await fetchBingWallpaper();
-        setWallpaper(newWallpaper);
-        localStorage.setItem('wallpaper', JSON.stringify(newWallpaper));
-        localStorage.setItem('wallpaperDate', today);
-      }
-    };
+    const savedColumns = localStorage.getItem('gridColumns');
+    if (savedColumns) setGridColumns(Number(savedColumns));
 
-    loadWallpaper();
+    checkAndLoadWallpaper(Number(savedInterval || 0));
   }, []);
+
+  const checkAndLoadWallpaper = async (interval: number) => {
+    const cached = localStorage.getItem('wallpaper');
+    const lastFetchTime = localStorage.getItem('wallpaperFetchTime');
+    const now = Date.now();
+
+    if (cached && lastFetchTime) {
+      const timeDiff = now - Number(lastFetchTime);
+      const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+      // If interval is set (>0) and time passed > interval, refresh
+      // If interval is 0 (daily), check if it's a new day (simplified check: > 24h or just rely on Bing's daily update which we can't control easily without index, so we stick to 24h cache for "daily")
+      const shouldRefresh = interval > 0 ? hoursDiff >= interval : hoursDiff >= 24;
+
+      if (!shouldRefresh) {
+        setWallpaper(JSON.parse(cached));
+        return;
+      }
+    }
+
+    // Need refresh
+    await refreshWallpaper();
+  };
+
+  const refreshWallpaper = async (random: boolean = false) => {
+    // If random, pick index 0-7. If not (daily/scheduled), pick 0 (today)
+    const index = random ? Math.floor(Math.random() * 8) : 0;
+    const newWallpaper = await fetchBingWallpaper(index);
+    setWallpaper(newWallpaper);
+    localStorage.setItem('wallpaper', JSON.stringify(newWallpaper));
+    localStorage.setItem('wallpaperFetchTime', String(Date.now()));
+  };
 
   const handleEffectChange = (newEffect: WallpaperEffect) => {
     setEffect(newEffect);
@@ -69,6 +95,16 @@ function App() {
     localStorage.setItem('manualLocation', location);
   };
 
+  const handleIntervalChange = (interval: number) => {
+    setRefreshInterval(interval);
+    localStorage.setItem('wallpaperRefreshInterval', String(interval));
+  };
+
+  const handleGridColumnsChange = (columns: number) => {
+    setGridColumns(columns);
+    localStorage.setItem('gridColumns', String(columns));
+  };
+
   return (
     <div
       className={`app-container effect-${effect}`}
@@ -82,7 +118,7 @@ function App() {
         <div className="center-content">
           <Clock />
           <Search />
-          <Bookmarks isLocked={isLocked} />
+          <Bookmarks isLocked={isLocked} gridColumns={gridColumns} />
         </div>
 
         <Settings
@@ -94,13 +130,22 @@ function App() {
           onToggleWeather={toggleWeather}
           manualLocation={manualLocation}
           onLocationChange={handleLocationChange}
+          refreshInterval={refreshInterval}
+          onIntervalChange={handleIntervalChange}
+          gridColumns={gridColumns}
+          onGridColumnsChange={handleGridColumnsChange}
         />
 
-        {wallpaper && (
-          <div className="wallpaper-info">
-            {wallpaper.copyright}
-          </div>
-        )}
+        <div className="bottom-left-controls">
+          <button className="refresh-btn" onClick={() => refreshWallpaper(true)} title="Random Wallpaper">
+            <FaSyncAlt />
+          </button>
+          {wallpaper && (
+            <div className="wallpaper-info">
+              {wallpaper.copyright}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
